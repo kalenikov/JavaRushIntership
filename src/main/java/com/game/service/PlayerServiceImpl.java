@@ -2,6 +2,7 @@ package com.game.service;
 
 import com.game.entity.Player;
 import com.game.exceptions.BadRequestException;
+import com.game.exceptions.NotFoundException;
 import com.game.repository.PlayerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -76,8 +77,22 @@ public class PlayerServiceImpl implements PlayerService {
         return null;
     }
 
+
+    //Delete player
+    //Если игрок не найден в БД, необходимо ответить ошибкой с
+    //кодом 404.
+    //Если значение id не валидное, необходимо ответить ошибкой
+    //с кодом 400.
+
     @Override
+    @Transactional
     public void deleteById(Long id) {
+        if (id == null || id <= 0) {
+            throw new BadRequestException("incorrect id");
+        }
+        if (!repo.existsById(id)) {
+            throw new NotFoundException(id + " not found");
+        }
         repo.deleteById(id);
     }
 
@@ -85,6 +100,4 @@ public class PlayerServiceImpl implements PlayerService {
     public Player getById(long id) {
         return repo.getOne(id);
     }
-
-
 }

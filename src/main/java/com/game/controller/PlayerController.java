@@ -121,16 +121,9 @@ public class PlayerController {
 
     }
 
-
-    //Delete player
-    //Если игрок не найден в БД, необходимо ответить ошибкой с
-    //кодом 404.
-    //Если значение id не валидное, необходимо ответить ошибкой
-    //с кодом 400.
-
     @DeleteMapping("/players/{id}")
-    public ResponseEntity<Player> delete(@PathVariable int id) {
-//        playerService.deleteById(id);
+    public ResponseEntity<Player> delete(@PathVariable Long id) {
+        playerService.deleteById(id);
         return ResponseEntity.ok().build();
     }
 }
