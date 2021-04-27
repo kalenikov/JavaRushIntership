@@ -27,6 +27,6 @@ public interface PlayerService {
 
     void deleteById(Long id);
 
-    Player getById(long id);
+    Player getById(Long id);
 
 }

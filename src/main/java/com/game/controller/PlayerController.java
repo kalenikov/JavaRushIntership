@@ -42,6 +42,18 @@ public class PlayerController {
         return ResponseEntity.ok(playerService.add(player));
     }
 
+    @DeleteMapping("/players/{id}")
+    public ResponseEntity<Player> delete(@PathVariable Long id) {
+        playerService.deleteById(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/players/{id}")
+    public ResponseEntity<Player> getBy(@PathVariable Long id) {
+        return ResponseEntity.ok(playerService.getById(id));
+    }
+
+
     @GetMapping("/players")
     public List<Player> getAll(@RequestParam String name,
                                @RequestParam String title,
@@ -84,10 +96,6 @@ public class PlayerController {
     //кодом 404.
     //Если значение id не валидное, необходимо ответить ошибкой
     //с кодом 400.
-    @GetMapping("/players/{id}")
-    public ResponseEntity<Player> getBy(@PathVariable @Validated int id) {
-        return ResponseEntity.ok(playerService.getById(id));
-    }
 
 
     //    Update player
@@ -106,24 +114,21 @@ public class PlayerController {
                                          @RequestParam Optional<Boolean> banned,
                                          @RequestParam Optional<Integer> experience) {
 
-        Player player;
-        try {
-            player = playerService.getById(id);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.badRequest().build();
-        }
-        if (player == null) {
-            return ResponseEntity.notFound().build();
-        }
-        playerService.add(player);
-        return ResponseEntity.ok().build();
+//        Player player;
+//        try {
+//            player = playerService.getById(id);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return ResponseEntity.badRequest().build();
+//        }
+//        if (player == null) {
+//            return ResponseEntity.notFound().build();
+//        }
+//        playerService.add(player);
+//        return ResponseEntity.ok().build();
+        return null;
 
     }
 
-    @DeleteMapping("/players/{id}")
-    public ResponseEntity<Player> delete(@PathVariable Long id) {
-        playerService.deleteById(id);
-        return ResponseEntity.ok().build();
-    }
+
 }

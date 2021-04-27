@@ -36,7 +36,7 @@ public class DeletePlayerTest extends AbstractTest {
         mockMvc.perform(delete("/rest/players/1"))
                 .andExpect(status().isOk());
 
-//        mockMvc.perform(get("/rest/players/1"))
-//                .andExpect(status().isNotFound());
+        mockMvc.perform(get("/rest/players/1"))
+                .andExpect(status().isNotFound());
     }
 }

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.Optional;
 
 @Service
 public class PlayerServiceImpl implements PlayerService {
@@ -97,7 +98,17 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public Player getById(long id) {
-        return repo.getOne(id);
+    public Player getById(Long id) {
+        if (id == null || id <= 0) {
+            throw new BadRequestException("incorrect id");
+        }
+        if (!repo.existsById(id)) {
+            throw new NotFoundException(id + " not found");
+        }
+        Optional<Player> player = repo.findById(id);
+        if (!player.isPresent()){
+            throw new NotFoundException("not found");
+        }
+        return player.get();
     }
 }
