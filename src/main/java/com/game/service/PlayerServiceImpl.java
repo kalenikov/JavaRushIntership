@@ -9,10 +9,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
 import java.util.Optional;
+
+import static com.game.service.Utils.*;
 
 @Service
 public class PlayerServiceImpl implements PlayerService {
@@ -30,18 +30,6 @@ public class PlayerServiceImpl implements PlayerService {
         return repo.count(specification);
     }
 
-
-    //    Мы не можем создать игрока, если:
-    //    - указаны не все параметры из Data Params (кроме banned);
-    //    - длина значения параметра “name” или “title” превышает
-    //    размер соответствующего поля в БД (12 и 30 символов);
-    //    - значение параметра “name” пустая строка;
-    //    - опыт находится вне заданных пределов;
-    //    - “birthday”:[Long] < 0;
-    //    - дата регистрации находятся вне заданных пределов.
-    //    В случае всего вышеперечисленного необходимо ответить
-    //    ошибкой с кодом 400
-
     @Override
     public Player add(Player player) {
         if (player.getName() == null
@@ -55,21 +43,18 @@ public class PlayerServiceImpl implements PlayerService {
                 || player.getName().isEmpty()
                 || player.getExperience() < 0
                 || player.getExperience() > 10_000_000) {
-            throw new BadRequestException("incorrect params");
+            throw new BadRequestException();
         }
-
-        if (!(player.getBirthday().after(new Date(946587600000L))
-                && player.getBirthday().before(new Date(32503582800000L)))) {
-            throw new BadRequestException("incorrect date params");
+        if (!validateDate(player)) {
+            throw new BadRequestException();
         }
-
-        int level = (int) (Math.sqrt(2500 + 200 * player.getExperience()) - 50) / 100;
-        int untilNextLevel = 50 * (level + 1) * (level + 2) - player.getExperience();
-        player.setLevel(level);
-        player.setUntilNextLevel(untilNextLevel);
         if (player.getBanned() == null) {
             player.setBanned(false);
         }
+        int level = calcLevel(player);
+        int untilNextLevel = calcNextLevel(player, level);
+        player.setLevel(level);
+        player.setUntilNextLevel(untilNextLevel);
         return repo.saveAndFlush(player);
     }
 
@@ -78,14 +63,14 @@ public class PlayerServiceImpl implements PlayerService {
         Player updatedPlayer = getById(id);
         if (newPlayer.getName() != null) {
             if (updatedPlayer.getName().isEmpty() || updatedPlayer.getName().length() > 12) {
-                throw new BadRequestException("");
+                throw new BadRequestException();
             }
             updatedPlayer.setName(newPlayer.getName());
         }
 
         if (newPlayer.getTitle() != null) {
             if (newPlayer.getTitle().isEmpty() || newPlayer.getTitle().length() > 30) {
-                throw new BadRequestException("");
+                throw new BadRequestException();
             }
             updatedPlayer.setTitle(newPlayer.getTitle());
         }
@@ -97,9 +82,8 @@ public class PlayerServiceImpl implements PlayerService {
             updatedPlayer.setProfession(newPlayer.getProfession());
         }
         if (newPlayer.getBirthday() != null) {
-            if (!(newPlayer.getBirthday().after(new Date(946587600000L))
-                    && newPlayer.getBirthday().before(new Date(32503582800000L)))) {
-                throw new BadRequestException("incorrect date params");
+            if (!(validateDate(newPlayer))) {
+                throw new BadRequestException();
             }
             updatedPlayer.setBirthday(newPlayer.getBirthday());
         }
@@ -109,42 +93,39 @@ public class PlayerServiceImpl implements PlayerService {
 
         if (newPlayer.getExperience() != null) {
             if (newPlayer.getExperience() < 0 || newPlayer.getExperience() > 10_000_000) {
-                throw new BadRequestException("");
+                throw new BadRequestException();
             }
             updatedPlayer.setExperience(newPlayer.getExperience());
-            int level = (int) (Math.sqrt(2500 + 200 * newPlayer.getExperience()) - 50) / 100;
-            int untilNextLevel = 50 * (level + 1) * (level + 2) - newPlayer.getExperience();
+            int level = calcLevel(newPlayer);
+            int untilNextLevel = calcNextLevel(newPlayer, level);
             updatedPlayer.setLevel(level);
             updatedPlayer.setUntilNextLevel(untilNextLevel);
-
         }
         return repo.saveAndFlush(updatedPlayer);
     }
 
     @Override
-    @Transactional
     public void deleteById(Long id) {
-        if (id == null || id <= 0) {
-            throw new BadRequestException("incorrect id");
-        }
-        if (!repo.existsById(id)) {
-            throw new NotFoundException(id + " not found");
-        }
+        validateId(id);
         repo.deleteById(id);
     }
 
     @Override
     public Player getById(Long id) {
-        if (id == null || id <= 0) {
-            throw new BadRequestException("incorrect id");
-        }
-        if (!repo.existsById(id)) {
-            throw new NotFoundException(id + " not found");
-        }
+        validateId(id);
         Optional<Player> player = repo.findById(id);
         if (!player.isPresent()) {
-            throw new NotFoundException("not found");
+            throw new NotFoundException();
         }
         return player.get();
+    }
+
+    private void validateId(Long id) {
+        if (id == null || id <= 0) {
+            throw new BadRequestException();
+        }
+        if (!repo.existsById(id)) {
+            throw new NotFoundException();
+        }
     }
 }
