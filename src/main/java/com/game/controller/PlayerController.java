@@ -29,14 +29,6 @@ public class PlayerController {
         this.playerService = playerService;
     }
 
-//    Get players list /rest/players
-//    Get players count /rest/players/count
-//    Get player /rest/players/{id}
-
-//    Create player /rest/players
-//    Update player /rest/players/{id}
-//    Delete player /rest/players/{id}
-
     @PostMapping("/players")
     public ResponseEntity<Player> add(@RequestBody Player player) {
         return ResponseEntity.ok(playerService.add(player));
@@ -51,6 +43,12 @@ public class PlayerController {
     @GetMapping("/players/{id}")
     public ResponseEntity<Player> getBy(@PathVariable Long id) {
         return ResponseEntity.ok(playerService.getById(id));
+    }
+
+    @PostMapping("/players/{id}")
+    public ResponseEntity<Player> update(@PathVariable Long id,
+                                         @RequestBody Player player) {
+        return ResponseEntity.ok(playerService.update(id, player));
     }
 
 
@@ -89,45 +87,6 @@ public class PlayerController {
                       @RequestParam Integer minLevel) {
 //        return playerService.countBy();
         return 0;
-    }
-
-
-    //Если игрок не найден в БД, необходимо ответить ошибкой с
-    //кодом 404.
-    //Если значение id не валидное, необходимо ответить ошибкой
-    //с кодом 400.
-
-
-    //    Update player
-    //Обновлять нужно только те поля, которые не null.
-    //Если игрок не найден в БД, необходимо ответить ошибкой с
-    //кодом 404.
-    //Если значение id не валидное, необходимо ответить ошибкой
-    //с кодом 400.
-    @PostMapping("/players/{id}")
-    public ResponseEntity<Player> update(@PathVariable int id,
-                                         @RequestParam Optional<String> name,
-                                         @RequestParam Optional<String> title,
-                                         @RequestParam Optional<Race> race,
-                                         @RequestParam Optional<Profession> profession,
-                                         @RequestParam Optional<Long> birthday,
-                                         @RequestParam Optional<Boolean> banned,
-                                         @RequestParam Optional<Integer> experience) {
-
-//        Player player;
-//        try {
-//            player = playerService.getById(id);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return ResponseEntity.badRequest().build();
-//        }
-//        if (player == null) {
-//            return ResponseEntity.notFound().build();
-//        }
-//        playerService.add(player);
-//        return ResponseEntity.ok().build();
-        return null;
-
     }
 
 

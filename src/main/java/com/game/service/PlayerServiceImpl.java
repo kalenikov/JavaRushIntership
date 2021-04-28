@@ -74,16 +74,52 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     @Override
-    public Player update(Long id, Player player) {
-        return null;
+    public Player update(Long id, Player newPlayer) {
+        Player updatedPlayer = getById(id);
+        if (newPlayer.getName() != null) {
+            if (updatedPlayer.getName().isEmpty() || updatedPlayer.getName().length() > 12) {
+                throw new BadRequestException("");
+            }
+            updatedPlayer.setName(newPlayer.getName());
+        }
+
+        if (newPlayer.getTitle() != null) {
+            if (newPlayer.getTitle().isEmpty() || newPlayer.getTitle().length() > 30) {
+                throw new BadRequestException("");
+            }
+            updatedPlayer.setTitle(newPlayer.getTitle());
+        }
+
+        if (newPlayer.getRace() != null) {
+            updatedPlayer.setRace(newPlayer.getRace());
+        }
+        if (newPlayer.getProfession() != null) {
+            updatedPlayer.setProfession(newPlayer.getProfession());
+        }
+        if (newPlayer.getBirthday() != null) {
+            if (!(newPlayer.getBirthday().after(new Date(946587600000L))
+                    && newPlayer.getBirthday().before(new Date(32503582800000L)))) {
+                throw new BadRequestException("incorrect date params");
+            }
+            updatedPlayer.setBirthday(newPlayer.getBirthday());
+        }
+        if (newPlayer.getBanned() != null) {
+            updatedPlayer.setBanned(newPlayer.getBanned());
+        }
+
+        if (newPlayer.getExperience() != null) {
+            if (newPlayer.getExperience() < 0 || newPlayer.getExperience() > 10_000_000) {
+                throw new BadRequestException("");
+            }
+            updatedPlayer.setExperience(newPlayer.getExperience());
+            int level = (int) (Math.sqrt(2500 + 200 * newPlayer.getExperience()) - 50) / 100;
+            int untilNextLevel = 50 * (level + 1) * (level + 2) - newPlayer.getExperience();
+            updatedPlayer.setLevel(level);
+            updatedPlayer.setUntilNextLevel(untilNextLevel);
+
+        }
+        return repo.saveAndFlush(updatedPlayer);
     }
-
-
-    //Delete player
-    //Если игрок не найден в БД, необходимо ответить ошибкой с
-    //кодом 404.
-    //Если значение id не валидное, необходимо ответить ошибкой
-    //с кодом 400.
 
     @Override
     @Transactional
@@ -106,7 +142,7 @@ public class PlayerServiceImpl implements PlayerService {
             throw new NotFoundException(id + " not found");
         }
         Optional<Player> player = repo.findById(id);
-        if (!player.isPresent()){
+        if (!player.isPresent()) {
             throw new NotFoundException("not found");
         }
         return player.get();
